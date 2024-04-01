@@ -1,0 +1,50 @@
+version: '3.7'
+services:
+  mysql-db:
+    image: 'jc21/mariadb-aria:10.11.5'
+    container_name: "mysql-db"
+    restart: 'no'
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'npm'
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: 'npm'
+    volumes:
+      # win
+      - D:/zyr/code/data/nginx/mysql:/var/lib/mysql
+      # linux
+      # - /data/nginx/mysql:/var/lib/mysql
+  mongo-gui:
+    image: ugleiton/mongo-gui
+    container_name: "mongo-gui"
+    restart: 'no'
+    ports:
+      - "4321:4321"
+    environment:
+      ## mongodb为默认数据库；mongo-db为容器名称
+      - MONGO_URL=mongodb://mongodbUsername:mongodbPassword@mongo-db:27017
+    links:
+      - mongo-db
+    depends_on:
+      - mongo-db
+  mongo-db:
+    image: 'mongo:5.0'
+    container_name: "mongo-db"
+    restart: 'no'
+    ports:
+      - '27017:27017'
+    expose:
+      - '27017'
+    volumes:
+      # win
+      - D:/zyr/code/data/mongodb:/data/db
+      #linux
+      # - /data/mongodb:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodbUsername
+      MONGO_INITDB_ROOT_PASSWORD: mongodbPassword
+      MONGO_INITDB_DATABASE: mongoDatabase
+volumes:
+  mongodb: {}
