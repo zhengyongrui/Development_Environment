@@ -1,5 +1,6 @@
 version: '3.7'
 services:
+  ## mysql数据库
   mysql-db:
     image: 'jc21/mariadb-aria:10.11.5'
     container_name: "mysql-db"
@@ -16,6 +17,126 @@ services:
       - D:/zyr/code/data/nginx/mysql:/var/lib/mysql
       # linux
       # - /data/nginx/mysql:/var/lib/mysql
+  ## mq消息服务
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    volumes:
+      # win
+      - D:/zyr/code/data/rabbitmq/data:/var/lib/rabbitmq
+      - D:/zyr/code/data/rabbitmq/log:/var/log/rabbitmq
+      # linux
+      # - /data/rabbitmq/data:/var/lib/rabbitmq
+      # - /data/rabbitmq/log:/var/log/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+  # 检索数据库
+  elasticsearch:
+    image: elasticsearch:7.17.3
+    container_name: elasticsearch
+    user: root
+    environment:
+      #设置集群名称为elasticsearch
+      - "cluster.name=elasticsearch"
+      #以单一节点模式启动
+      - "discovery.type=single-node"
+       #设置使用jvm内存大小
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1024m"
+    volumes:
+      # win
+      - D:/zyr/code/data/elasticsearch/plugins:/usr/share/elasticsearch/plugins #插件文件挂载
+      - D:/zyr/code/data/elasticsearch/data:/usr/share/elasticsearch/data #数据文件挂载
+      # linux
+      # - /data/elasticsearch/plugins:/usr/share/elasticsearch/plugins #插件文件挂载
+      # - /data/elasticsearch/data:/usr/share/elasticsearch/data #数据文件挂载
+    ports:
+      - 9200:9200
+      - 9300:9300
+  # 日志处理
+  logstash:
+    image: logstash:7.17.3
+    container_name: logstash
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      # win
+      - D:/zyr/code/data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf #挂载logstash的配置文件
+      # linux
+      # - /data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf #挂载logstash的配置文件
+    depends_on:
+      #kibana在elasticsearch启动之后再启动
+      - elasticsearch 
+    links:
+      #可以用es这个域名访问elasticsearch服务
+      - elasticsearch:es 
+    ports:
+      - 4560:4560
+      - 4561:4561
+      - 4562:4562
+      - 4563:4563
+  # es简述可视化服务
+  kibana:
+    image: kibana:7.17.3
+    container_name: kibana
+    links:
+      - elasticsearch:es #可以用es这个域名访问elasticsearch服务
+    depends_on:
+      - elasticsearch #kibana在elasticsearch启动之后再启动
+    environment:
+      - "elasticsearch.hosts=http://es:9200" #设置访问elasticsearch的地址
+    ports:
+      - 5601:5601
+  ## 代理服务
+  nginx-manage:
+    image: 'jc21/nginx-proxy-manager:2'
+    container_name: nginx-manage
+    restart: 'no'
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
+    environment:
+      DB_MYSQL_HOST: "mysql-db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "npm"
+      DB_MYSQL_PASSWORD: "npm"
+      DB_MYSQL_NAME: "npm"
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
+    volumes:
+      # win
+      - D:/zyr/code/data/nginx/data:/data
+      - D:/zyr/code/data/nginx/letsencrypt:/etc/letsencrypt
+      # linux
+      # - /data/nginx/data:/data
+      # - /data/nginx/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - mysql-db
+  ## 缓存服务
+  redis:
+    image: redis:7
+    container_name: redis
+    command: redis-server --appendonly yes
+    volumes:
+      # win
+      - D:/zyr/code/data/redis/data:/data
+      # linux
+      # - /data/redis/data:/data
+    ports:
+      - 6379:6379
+  # 微服务注册中心
+  nacos-registry:
+    image: nacos/nacos-server:v2.1.0
+    container_name: nacos-registry
+    environment:
+      - "MODE=standalone"
+    ports:
+      - 8848:8848
+  # nosql数据库可视化服务
   mongo-gui:
     image: ugleiton/mongo-gui
     container_name: "mongo-gui"
@@ -29,6 +150,7 @@ services:
       - mongo-db
     depends_on:
       - mongo-db
+  # nosql数据库    
   mongo-db:
     image: 'mongo:5.0'
     container_name: "mongo-db"
