@@ -21,8 +21,14 @@ services:
       # - /data/mysql/log:/var/log/mysql #日志文件挂载
   ## mq消息服务
   rabbitmq:
-    image: rabbitmq:3.9-management
+    image: rabbitmq:3.13.1-management-alpine
     container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     volumes:
       # win
       - D:/zyr/code/data/rabbitmq/data:/var/lib/rabbitmq
@@ -30,9 +36,6 @@ services:
       # linux
       # - /data/rabbitmq/data:/var/lib/rabbitmq
       # - /data/rabbitmq/log:/var/log/rabbitmq
-    ports:
-      - 5672:5672
-      - 15672:15672
   # 检索数据库
   elasticsearch:
     image: elasticsearch:7.17.3
@@ -148,7 +151,7 @@ services:
       # linux
       # - /data/redis/data:/data
     ports:
-      - 6379:6379
+      - 6379:6379 
   # 微服务注册中心
   nacos-registry:
     image: nacos/nacos-server:v2.1.0
