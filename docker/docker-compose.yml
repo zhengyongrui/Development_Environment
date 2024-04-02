@@ -4,7 +4,7 @@ services:
     image: mysql:5.7
     container_name: mysql
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    restart: always
+    restart: 'no'
     environment:
       #设置root帐号密码
       MYSQL_ROOT_PASSWORD: root
