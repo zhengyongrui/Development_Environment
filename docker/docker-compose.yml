@@ -1,22 +1,24 @@
 version: '3.7'
 services:
-  ## mysql数据库
-  mysql-db:
-    image: 'jc21/mariadb-aria:10.11.5'
-    container_name: "mysql-db"
-    restart: 'no'
-    ports:
-      - "3306:3306"
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 'npm'
-      MYSQL_DATABASE: 'npm'
-      MYSQL_USER: 'npm'
-      MYSQL_PASSWORD: 'npm'
+      #设置root帐号密码
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - 3306:3306
     volumes:
       # win
-      - D:/zyr/code/data/nginx/mysql:/var/lib/mysql
+      - D:/zyr/code/data/mysql/data/db:/var/lib/mysql #数据文件挂载
+      - D:/zyr/code/data/mysql/data/conf:/etc/mysql/conf.d #配置文件挂载
+      - D:/zyr/code/data/mysql/log:/var/log/mysql #日志文件挂载
       # linux
-      # - /data/nginx/mysql:/var/lib/mysql
+      # - /data/mysql/data/db:/var/lib/mysql #数据文件挂载
+      # - /data/mysql/data/conf:/etc/mysql/conf.d #配置文件挂载
+      # - /data/mysql/log:/var/log/mysql #日志文件挂载
   ## mq消息服务
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -87,6 +89,23 @@ services:
       - "elasticsearch.hosts=http://es:9200" #设置访问elasticsearch的地址
     ports:
       - 5601:5601
+  ## nginx代理服务mariadb数据库
+  nginx-db:
+    image: 'jc21/mariadb-aria:10.11.5'
+    container_name: "nginx-db"
+    restart: 'no'
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'npm'
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: 'npm'
+    volumes:
+      # win
+      - D:/zyr/code/data/nginx/mysql:/var/lib/mysql
+      # linux
+      # - /data/nginx/mysql:/var/lib/mysql
   ## 代理服务
   nginx-manage:
     image: 'jc21/nginx-proxy-manager:2'
@@ -100,7 +119,7 @@ services:
       # Add any other Stream port you want to expose
       # - '21:21' # FTP
     environment:
-      DB_MYSQL_HOST: "mysql-db"
+      DB_MYSQL_HOST: "nginx-db"
       DB_MYSQL_PORT: 3306
       DB_MYSQL_USER: "npm"
       DB_MYSQL_PASSWORD: "npm"
@@ -114,8 +133,10 @@ services:
       # linux
       # - /data/nginx/data:/data
       # - /data/nginx/letsencrypt:/etc/letsencrypt
+    links:
+      - nginx-db
     depends_on:
-      - mysql-db
+      - nginx-db
   ## 缓存服务
   redis:
     image: redis:7
