@@ -19,11 +19,11 @@ services:
       # win
       - D:/zyr/code/data/mysql/data/db:/var/lib/mysql #数据文件挂载
       - D:/zyr/code/data/mysql/data/conf:/etc/mysql/conf.d #配置文件挂载
-      - D:/zyr/code/data/mysql/log:/var/log/mysql #日志文件挂载
+      - D:/zyr/code/log/mysql/log:/var/log/mysql #日志文件挂载
       # linux
       # - /data/mysql/data/db:/var/lib/mysql #数据文件挂载
       # - /data/mysql/data/conf:/etc/mysql/conf.d #配置文件挂载
-      # - /data/mysql/log:/var/log/mysql #日志文件挂载
+      # - /log/mysql/log:/var/log/mysql #日志文件挂载
   # mq消息服务
   rabbitmq:
     image: rabbitmq:3.13.1-management-alpine
@@ -42,10 +42,10 @@ services:
     volumes:
       # win
       - D:/zyr/code/data/rabbitmq/data:/var/lib/rabbitmq
-      - D:/zyr/code/data/rabbitmq/log:/var/log/rabbitmq
+      - D:/zyr/code/log/rabbitmq/log:/var/log/rabbitmq
       # linux
       # - /data/rabbitmq/data:/var/lib/rabbitmq
-      # - /data/rabbitmq/log:/var/log/rabbitmq
+      # - /log/rabbitmq/log:/var/log/rabbitmq
   # 检索数据库
   elasticsearch:
     image: elasticsearch:7.17.3
@@ -131,11 +131,11 @@ services:
       # win
       - D:/zyr/code/data/nginx/conf/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
       - D:/zyr/code/data/nginx/html:/usr/share/nginx/html #静态资源根目录挂载
-      - D:/zyr/code/data/nginx/log:/var/log/nginx #日志文件挂载
+      - D:/zyr/code/log/nginx/log:/var/log/nginx #日志文件挂载
       # linux
       # - /data/nginx/conf/nginx.conf:/etc/nginx/nginx.conf #配置文件挂载
       # - /data/nginx/html:/usr/share/nginx/html #静态资源根目录挂载
-      # - /data/nginx/log:/var/log/nginx #日志文件挂载
+      # - /log/nginx/log:/var/log/nginx #日志文件挂载
   # nginx代理服务mariadb数据库
   # nginx-db:
   #   image: 'jc21/mariadb-aria:10.11.5'
