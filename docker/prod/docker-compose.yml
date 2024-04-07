@@ -232,5 +232,26 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongodbUsername
       MONGO_INITDB_ROOT_PASSWORD: mongodbPassword
       MONGO_INITDB_DATABASE: mongoDatabase
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: "jenkins"
+    restart: 'no'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    user: root
+    privileged: true
+    ports:
+      - "8089:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home # 保存Jenkins的数据持久化
+      # win
+      # # - D:/mall-swarm:/usr/local/mall-swarm 
+      #linux
+      - /data/jenkins/code:/usr/local
 volumes:
   mongodb: {}
+  jenkins_home: {}
